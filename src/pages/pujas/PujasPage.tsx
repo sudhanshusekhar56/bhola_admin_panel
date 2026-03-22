@@ -127,7 +127,7 @@ export default function PujasPage() {
 
   const sortedPujas = [...filteredPujas].sort((a, b) => {
     if (!sortConfig) return 0;
-    
+
     let keys: string[] = [];
     if (sortConfig.key === "name") keys = ["name"];
     else if (sortConfig.key === "amount") keys = ["amount"];
@@ -152,12 +152,9 @@ export default function PujasPage() {
   const pagedPujas = sortedPujas.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       <div>
-        <h2 className="text-xl font-semibold">Pujas</h2>
-        <p className="text-sm text-muted-foreground">
-          Add/update pujas and pricing
-        </p>
+        <h2 className="text-xl font-semibold">Add/update pujas and pricing</h2>
       </div>
 
       <div className="rounded-lg border p-4">
@@ -175,9 +172,7 @@ export default function PujasPage() {
           <Input
             placeholder="Description"
             value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <Input
             type="number"

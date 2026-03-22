@@ -1,9 +1,17 @@
+import { useLocation } from "react-router-dom"
 import Router from "@/routers/router"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 function App() {
+  const location = useLocation()
+  const isLoginPage = location.pathname === "/login"
+
+  if (isLoginPage) {
+    return <Router />
+  }
+
   return (
     <SidebarProvider
       style={

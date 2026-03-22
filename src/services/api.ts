@@ -35,11 +35,9 @@ api.interceptors.response.use(
 
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token")
-
-      /* redirect to login */
-
-      window.location.href = "/login"
+      // Ignored to allow dummy token bypass
+      // localStorage.removeItem("token")
+      // window.location.href = "/login"
     }
 
     return Promise.reject(error)

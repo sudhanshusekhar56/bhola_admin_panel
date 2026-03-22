@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react"
-import { ArrowUpDown } from "lucide-react"
+import { useEffect, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
 
 import {
   createMandir,
   updateMandir,
   removeMandir,
   getMandirsCatalog,
-} from "@/services/admin.service"
-import { dummyMandirs } from "@/data/mockData"
+} from "@/services/admin.service";
+import { dummyMandirs } from "@/data/mockData";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import {
   Table,
@@ -19,20 +19,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 export default function MandirsPage() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
-  const [mandirs, setMandirs] = useState<any[]>(dummyMandirs)
-  const [search, setSearch] = useState("")
+  const [mandirs, setMandirs] = useState<any[]>(dummyMandirs);
+  const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState<{
-    key: string
-    direction: "asc" | "desc"
-  } | null>(null)
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
 
-  const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const [form, setForm] = useState({
     name: "",
@@ -40,138 +40,145 @@ export default function MandirsPage() {
     state: "",
     description: "",
     howToReach: "",
-  })
+  });
 
   const [editForm, setEditForm] = useState({
     mandirId: "",
-  })
+  });
 
   useEffect(() => {
-    loadMandirs()
-  }, [])
+    loadMandirs();
+  }, []);
 
   async function loadMandirs() {
     try {
-      setLoading(true)
-      const res = await getMandirsCatalog()
+      setLoading(true);
+      const res = await getMandirsCatalog();
       // setMandirs(extractRows(res))
-      setPage(1)
+      setPage(1);
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setLoading(true)
-      await createMandir(form)
-      loadMandirs()
+      setLoading(true);
+      await createMandir(form);
+      loadMandirs();
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleUpdate() {
     try {
-      setLoading(true)
-      await updateMandir(editForm.mandirId, form)
-      loadMandirs()
+      setLoading(true);
+      await updateMandir(editForm.mandirId, form);
+      loadMandirs();
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleDelete() {
     try {
-      setLoading(true)
-      await removeMandir(editForm.mandirId)
-      loadMandirs()
+      setLoading(true);
+      await removeMandir(editForm.mandirId);
+      loadMandirs();
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleSort(key: string) {
-    let direction: "asc" | "desc" = "asc"
+    let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
-      direction = "desc"
+      direction = "desc";
     }
-    setSortConfig({ key, direction })
+    setSortConfig({ key, direction });
   }
 
   function pick(item: any, keys: string[]) {
     for (const key of keys) {
-      const value = item[key]
+      const value = item[key];
       if (value !== undefined && value !== null && `${value}`.trim() !== "") {
-        return typeof value === "string" ? value : JSON.stringify(value)
+        return typeof value === "string" ? value : JSON.stringify(value);
       }
     }
-    return "-"
+    return "-";
   }
 
   function extractRows(payload: any) {
     if (Array.isArray(payload)) {
-      return payload.filter((e) => typeof e === "object")
+      return payload.filter((e) => typeof e === "object");
     }
     if (payload && typeof payload === "object") {
-      const values = Object.values(payload)
-      const arr = values.find((v) => Array.isArray(v))
+      const values = Object.values(payload);
+      const arr = values.find((v) => Array.isArray(v));
       if (Array.isArray(arr)) {
-        return arr.filter((e) => typeof e === "object")
+        return arr.filter((e) => typeof e === "object");
       }
     }
-    return []
+    return [];
   }
 
   // Filter & Sort
   const filteredMandirs = mandirs.filter((m) => {
-    if (!search) return true
-    const term = search.toLowerCase()
-    
-    // Check name, city, state, or ID
-    const nameVal = pick(m, ["name"]).toLowerCase()
-    const cityVal = pick(m, ["city"]).toLowerCase()
-    const stateVal = pick(m, ["state"]).toLowerCase()
-    const idVal = pick(m, ["id", "_id", "mandirId"]).toLowerCase()
+    if (!search) return true;
+    const term = search.toLowerCase();
 
-    return nameVal.includes(term) || cityVal.includes(term) || stateVal.includes(term) || idVal.includes(term)
-  })
+    // Check name, city, state, or ID
+    const nameVal = pick(m, ["name"]).toLowerCase();
+    const cityVal = pick(m, ["city"]).toLowerCase();
+    const stateVal = pick(m, ["state"]).toLowerCase();
+    const idVal = pick(m, ["id", "_id", "mandirId"]).toLowerCase();
+
+    return (
+      nameVal.includes(term) ||
+      cityVal.includes(term) ||
+      stateVal.includes(term) ||
+      idVal.includes(term)
+    );
+  });
 
   const sortedMandirs = [...filteredMandirs].sort((a, b) => {
-    if (!sortConfig) return 0
-    let keys: string[] = []
-    if (sortConfig.key === "name") keys = ["name"]
-    else if (sortConfig.key === "city") keys = ["city"]
-    else if (sortConfig.key === "state") keys = ["state"]
+    if (!sortConfig) return 0;
+    let keys: string[] = [];
+    if (sortConfig.key === "name") keys = ["name"];
+    else if (sortConfig.key === "city") keys = ["city"];
+    else if (sortConfig.key === "state") keys = ["state"];
 
-    const aVal = pick(a, keys).toLowerCase()
-    const bVal = pick(b, keys).toLowerCase()
+    const aVal = pick(a, keys).toLowerCase();
+    const bVal = pick(b, keys).toLowerCase();
 
-    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1
-    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1
-    return 0
-  })
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
-  const totalPages = Math.max(1, Math.ceil(sortedMandirs.length / pageSize))
-  const pagedMandirs = sortedMandirs.slice((page - 1) * pageSize, page * pageSize)
+  const totalPages = Math.max(1, Math.ceil(sortedMandirs.length / pageSize));
+  const pagedMandirs = sortedMandirs.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold">Mandirs</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl font-semibold">
           Create and update mandir inventory
-        </p>
+        </h2>
       </div>
 
       {/* Create Form */}
@@ -255,8 +262,8 @@ export default function MandirsPage() {
               placeholder="Search by ID, Name, City or State"
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
+                setSearch(e.target.value);
+                setPage(1);
               }}
               className="w-full sm:w-[320px]"
             />
@@ -271,17 +278,29 @@ export default function MandirsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("name")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("name")}
+                      className="-ml-4"
+                    >
                       Name <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("city")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("city")}
+                      className="-ml-4"
+                    >
                       City <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("state")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("state")}
+                      className="-ml-4"
+                    >
                       State <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
@@ -325,5 +344,5 @@ export default function MandirsPage() {
         )}
       </div>
     </section>
-  )
+  );
 }

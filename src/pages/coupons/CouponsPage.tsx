@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
-import { ArrowUpDown } from "lucide-react"
-import { getCoupons, createCoupon } from "@/services/admin.service"
-import { dummyCoupons } from "@/data/mockData"
+import { useEffect, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
+import { getCoupons, createCoupon } from "@/services/admin.service";
+import { dummyCoupons } from "@/data/mockData";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableHeader,
@@ -12,133 +12,133 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 export default function CouponsPage() {
-  const [loading, setLoading] = useState(false)
-  
-  const [coupons, setCoupons] = useState<any[]>(dummyCoupons)
-  const [search, setSearch] = useState("")
-  const [sortConfig, setSortConfig] = useState<{
-    key: string
-    direction: "asc" | "desc"
-  } | null>(null)
+  const [loading, setLoading] = useState(false);
 
-  const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [coupons, setCoupons] = useState<any[]>(dummyCoupons);
+  const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const [form, setForm] = useState({
     code: "",
     discountPercent: 10,
-  })
+  });
 
   useEffect(() => {
-    loadCoupons()
-  }, [])
+    loadCoupons();
+  }, []);
 
   async function loadCoupons() {
     try {
-      setLoading(true)
-      const res = await getCoupons()
+      setLoading(true);
+      const res = await getCoupons();
       // setCoupons(extractRows(res))
-      setPage(1)
+      setPage(1);
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreateCoupon(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setLoading(true)
-      await createCoupon(form)
-      loadCoupons()
+      setLoading(true);
+      await createCoupon(form);
+      loadCoupons();
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleSort(key: string) {
-    let direction: "asc" | "desc" = "asc"
+    let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
-      direction = "desc"
+      direction = "desc";
     }
-    setSortConfig({ key, direction })
+    setSortConfig({ key, direction });
   }
 
   function pick(item: any, keys: string[]) {
     for (const key of keys) {
-      const value = item[key]
+      const value = item[key];
       if (value !== undefined && value !== null && `${value}`.trim() !== "") {
-        return typeof value === "string" ? value : JSON.stringify(value)
+        return typeof value === "string" ? value : JSON.stringify(value);
       }
     }
-    return "-"
+    return "-";
   }
 
   function extractRows(payload: any) {
     if (Array.isArray(payload)) {
-      return payload.filter((entry) => typeof entry === "object")
+      return payload.filter((entry) => typeof entry === "object");
     }
     if (payload && typeof payload === "object") {
-      const values = Object.values(payload)
-      const arr = values.find((v) => Array.isArray(v))
+      const values = Object.values(payload);
+      const arr = values.find((v) => Array.isArray(v));
       if (Array.isArray(arr)) {
-        return arr.filter((entry) => typeof entry === "object")
+        return arr.filter((entry) => typeof entry === "object");
       }
     }
-    return []
+    return [];
   }
 
   // Filter & Sort
   const filteredCoupons = coupons.filter((c) => {
-    if (!search) return true
-    const term = search.toLowerCase()
-    const codeVal = pick(c, ["code"]).toLowerCase()
-    return codeVal.includes(term)
-  })
+    if (!search) return true;
+    const term = search.toLowerCase();
+    const codeVal = pick(c, ["code"]).toLowerCase();
+    return codeVal.includes(term);
+  });
 
   const sortedCoupons = [...filteredCoupons].sort((a, b) => {
-    if (!sortConfig) return 0
-    let keys: string[] = []
-    if (sortConfig.key === "code") keys = ["code"]
-    else if (sortConfig.key === "discount") keys = ["discountPercent"]
-    else if (sortConfig.key === "status") keys = ["status"]
+    if (!sortConfig) return 0;
+    let keys: string[] = [];
+    if (sortConfig.key === "code") keys = ["code"];
+    else if (sortConfig.key === "discount") keys = ["discountPercent"];
+    else if (sortConfig.key === "status") keys = ["status"];
 
-    let aVal: any = pick(a, keys)
-    let bVal: any = pick(b, keys)
+    let aVal: any = pick(a, keys);
+    let bVal: any = pick(b, keys);
 
     if (sortConfig.key === "discount") {
-      aVal = Number(aVal) || 0
-      bVal = Number(bVal) || 0
+      aVal = Number(aVal) || 0;
+      bVal = Number(bVal) || 0;
     } else {
-      aVal = String(aVal).toLowerCase()
-      bVal = String(bVal).toLowerCase()
+      aVal = String(aVal).toLowerCase();
+      bVal = String(bVal).toLowerCase();
     }
 
-    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1
-    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1
-    return 0
-  })
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
-  const totalPages = Math.max(1, Math.ceil(sortedCoupons.length / pageSize))
-  const pagedCoupons = sortedCoupons.slice((page - 1) * pageSize, page * pageSize)
+  const totalPages = Math.max(1, Math.ceil(sortedCoupons.length / pageSize));
+  const pagedCoupons = sortedCoupons.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-semibold">
-            Coupons
-          </h2>
-          <p className="text-sm text-muted-foreground">
             Create and list coupons
-          </p>
+          </h2>
         </div>
 
         <Button variant="outline" onClick={loadCoupons} disabled={loading}>
@@ -187,8 +187,8 @@ export default function CouponsPage() {
               placeholder="Search by Code"
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
+                setSearch(e.target.value);
+                setPage(1);
               }}
               className="w-full sm:w-[300px]"
             />
@@ -203,17 +203,29 @@ export default function CouponsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("code")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("code")}
+                      className="-ml-4"
+                    >
                       Code <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("discount")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("discount")}
+                      className="-ml-4"
+                    >
                       Discount % <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort("status")} className="-ml-4">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort("status")}
+                      className="-ml-4"
+                    >
                       Status <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
@@ -255,5 +267,5 @@ export default function CouponsPage() {
         )}
       </div>
     </section>
-  )
+  );
 }

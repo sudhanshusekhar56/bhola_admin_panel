@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react"
-import { ArrowUpDown } from "lucide-react"
+import { useEffect, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
 
 import {
   approvePandit,
   rejectPandit,
   getPandits,
   getBookings,
-} from "@/services/admin.service"
-import { dummyPandits } from "@/data/mockData"
+} from "@/services/admin.service";
+import { dummyPandits } from "@/data/mockData";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,196 +18,200 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 export default function PanditsPage() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const [pandits, setPandits] = useState<any[]>(
-    dummyPandits.map((p) => ({ ...p, status: p.status || "PENDING" }))
-  )
-  
-  const [search, setSearch] = useState("")
-  const [sortConfig, setSortConfig] = useState<{
-    key: string
-    direction: "asc" | "desc"
-  } | null>(null)
+    dummyPandits.map((p) => ({ ...p, status: p.status || "PENDING" })),
+  );
 
-  const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
-    loadPandits()
-  }, [])
+    loadPandits();
+  }, []);
 
   async function handleStatusChange(item: any, newStatus: string) {
-    const id = pick(item, ["panditId", "id", "_id"])
-    if (id === "-") return
+    const id = pick(item, ["panditId", "id", "_id"]);
+    if (id === "-") return;
 
     try {
-      setLoading(true)
+      setLoading(true);
 
       if (newStatus === "APPROVED") {
-        await approvePandit(id)
+        await approvePandit(id);
       } else if (newStatus === "REJECTED" || newStatus === "BLOCKED") {
-        await rejectPandit(id)
+        await rejectPandit(id);
       }
 
       const updated = pandits.map((p) =>
         pick(p, ["panditId", "id", "_id"]) === id
           ? { ...p, status: newStatus }
-          : p
-      )
-      setPandits(updated)
+          : p,
+      );
+      setPandits(updated);
     } catch {
       // ignore
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function loadPandits() {
     try {
-      setLoading(true)
-      const res = await getPandits()
-      const rows = extractRows(res)
+      setLoading(true);
+      const res = await getPandits();
+      const rows = extractRows(res);
 
       if (rows.length === 0) {
-        loadPanditsFromBookings()
-        return
+        loadPanditsFromBookings();
+        return;
       }
 
       // setPandits(rows)
-      setPage(1)
+      setPage(1);
     } catch {
-      loadPanditsFromBookings()
+      loadPanditsFromBookings();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function loadPanditsFromBookings() {
     try {
-      setLoading(true)
-      const res = await getBookings()
-      const rows = extractRows(res)
+      setLoading(true);
+      const res = await getBookings();
+      const rows = extractRows(res);
 
       const panditRows = rows
         .map((entry) => {
-          const panditId = pickId(entry, ["panditId", "pandit"])
-          return panditId === "-" ? null : { panditId }
+          const panditId = pickId(entry, ["panditId", "pandit"]);
+          return panditId === "-" ? null : { panditId };
         })
-        .filter(Boolean)
+        .filter(Boolean);
 
       const unique = Array.from(
-        new Set(panditRows.map((p: any) => p.panditId))
-      ).map((panditId) => ({ panditId }))
+        new Set(panditRows.map((p: any) => p.panditId)),
+      ).map((panditId) => ({ panditId }));
 
       // setPandits(unique)
-      setPage(1)
+      setPage(1);
     } catch {
       // setPandits([])
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleSort(key: string) {
-    let direction: "asc" | "desc" = "asc"
+    let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
-      direction = "desc"
+      direction = "desc";
     }
-    setSortConfig({ key, direction })
+    setSortConfig({ key, direction });
   }
 
   function pickId(item: any, keys: string[]) {
     for (const key of keys) {
-      const value = item[key]
-      if (typeof value === "string" && value.trim() !== "") return value
+      const value = item[key];
+      if (typeof value === "string" && value.trim() !== "") return value;
       if (value && typeof value === "object") {
         const nestedId =
-          value.id || value._id || value.panditId || value.userId || value.uid
-        if (nestedId) return nestedId
+          value.id || value._id || value.panditId || value.userId || value.uid;
+        if (nestedId) return nestedId;
       }
     }
-    return "-"
+    return "-";
   }
 
   function pick(item: any, keys: string[]) {
     for (const key of keys) {
-      const value = item[key]
+      const value = item[key];
       if (value !== undefined && value !== null && `${value}`.trim() !== "") {
-        return typeof value === "string" ? value : JSON.stringify(value)
+        return typeof value === "string" ? value : JSON.stringify(value);
       }
     }
-    return "-"
+    return "-";
   }
 
   function extractRows(payload: any): any[] {
-    const candidates = findObjectArrays(payload)
-    if (candidates.length === 0) return []
-    candidates.sort((a, b) => b.length - a.length)
-    return candidates[0]
+    const candidates = findObjectArrays(payload);
+    if (candidates.length === 0) return [];
+    candidates.sort((a, b) => b.length - a.length);
+    return candidates[0];
   }
 
   function findObjectArrays(payload: any, depth = 0): any[][] {
-    if (depth > 6 || payload === null || payload === undefined) return []
+    if (depth > 6 || payload === null || payload === undefined) return [];
     if (Array.isArray(payload)) {
-      const objectRows = payload.filter((entry) => typeof entry === "object")
+      const objectRows = payload.filter((entry) => typeof entry === "object");
       const nested = payload.flatMap((entry) =>
-        findObjectArrays(entry, depth + 1)
-      )
-      return objectRows.length > 0 ? [objectRows, ...nested] : nested
+        findObjectArrays(entry, depth + 1),
+      );
+      return objectRows.length > 0 ? [objectRows, ...nested] : nested;
     }
     if (typeof payload === "object") {
       return Object.values(payload).flatMap((value) =>
-        findObjectArrays(value, depth + 1)
-      )
+        findObjectArrays(value, depth + 1),
+      );
     }
-    return []
+    return [];
   }
 
   const filteredPandits = pandits.filter((p) => {
-    if (!search) return true
-    const term = search.toLowerCase()
-    const idVal = pick(p, ["panditId", "id", "_id"]).toLowerCase()
-    const nameVal = pick(p, ["name", "fullName"]).toLowerCase()
-    const phoneVal = pick(p, ["phone", "mobile"]).toLowerCase()
-    return idVal.includes(term) || nameVal.includes(term) || phoneVal.includes(term)
-  })
+    if (!search) return true;
+    const term = search.toLowerCase();
+    const idVal = pick(p, ["panditId", "id", "_id"]).toLowerCase();
+    const nameVal = pick(p, ["name", "fullName"]).toLowerCase();
+    const phoneVal = pick(p, ["phone", "mobile"]).toLowerCase();
+    return (
+      idVal.includes(term) || nameVal.includes(term) || phoneVal.includes(term)
+    );
+  });
 
   const sortedPandits = [...filteredPandits].sort((a, b) => {
-    if (!sortConfig) return 0
-    let keys: string[] = []
-    if (sortConfig.key === "id") keys = ["panditId", "id", "_id"]
-    else if (sortConfig.key === "name") keys = ["name", "fullName"]
-    else if (sortConfig.key === "phone") keys = ["phone", "mobile"]
+    if (!sortConfig) return 0;
+    let keys: string[] = [];
+    if (sortConfig.key === "id") keys = ["panditId", "id", "_id"];
+    else if (sortConfig.key === "name") keys = ["name", "fullName"];
+    else if (sortConfig.key === "phone") keys = ["phone", "mobile"];
 
-    const aVal = pick(a, keys).toLowerCase()
-    const bVal = pick(b, keys).toLowerCase()
+    const aVal = pick(a, keys).toLowerCase();
+    const bVal = pick(b, keys).toLowerCase();
 
-    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1
-    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1
-    return 0
-  })
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
-  const totalPages = Math.max(1, Math.ceil(sortedPandits.length / pageSize))
-  const pagedPandits = sortedPandits.slice((page - 1) * pageSize, page * pageSize)
+  const totalPages = Math.max(1, Math.ceil(sortedPandits.length / pageSize));
+  const pagedPandits = sortedPandits.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       <div>
-        <h2 className="text-xl font-semibold">Pandits</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl font-semibold">
           Approve or reject onboarding requests
-        </p>
+        </h2>
       </div>
 
       <div className="rounded-lg border p-4">
@@ -224,8 +228,8 @@ export default function PanditsPage() {
               placeholder="Search by ID, Name or Phone"
               value={search}
               onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
+                setSearch(e.target.value);
+                setPage(1);
               }}
               className="w-full sm:w-[300px]"
             />
@@ -272,7 +276,7 @@ export default function PanditsPage() {
 
               <TableBody>
                 {pagedPandits.map((item, i) => {
-                  const currentStatus = item.status || "PENDING"
+                  const currentStatus = item.status || "PENDING";
                   return (
                     <TableRow key={i}>
                       <TableCell>
@@ -298,7 +302,7 @@ export default function PanditsPage() {
                         </Select>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -327,5 +331,5 @@ export default function PanditsPage() {
         )}
       </div>
     </section>
-  )
+  );
 }

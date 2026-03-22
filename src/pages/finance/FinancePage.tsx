@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   getFinanceSummary,
   createSettlement,
   createRefund,
-} from "@/services/admin.service"
+} from "@/services/admin.service";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import {
   BarChart,
@@ -15,96 +15,95 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-} from "recharts"
+} from "recharts";
 
 export default function FinancePage() {
-  const [loading, setLoading] = useState(false)
-  const [response, setResponse] = useState("Loading finance summary...")
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState("Loading finance summary...");
 
   const [chartData, setChartData] = useState([
     { name: "Commission", value: 0 },
     { name: "Settlement", value: 0 },
     { name: "TDS", value: 0 },
     { name: "GST", value: 0 },
-  ])
+  ]);
 
   const [settlementForm, setSettlementForm] = useState({
     panditId: "",
     amount: 0,
-  })
+  });
 
   const [refundForm, setRefundForm] = useState({
     bookingId: "",
-  })
+  });
 
   useEffect(() => {
-    loadFinanceSummary()
-  }, [])
+    loadFinanceSummary();
+  }, []);
 
   async function loadFinanceSummary() {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const res = await getFinanceSummary()
+      const res = await getFinanceSummary();
 
-      setResponse(JSON.stringify(res, null, 2))
+      setResponse(JSON.stringify(res, null, 2));
 
-      const obj = typeof res === "object" ? res : {}
+      const obj = typeof res === "object" ? res : {};
 
       setChartData([
         { name: "Commission", value: Number(obj?.commission ?? 0) },
         { name: "Settlement", value: Number(obj?.settlement ?? 0) },
         { name: "TDS", value: Number(obj?.tds ?? 0) },
         { name: "GST", value: Number(obj?.gst ?? 0) },
-      ])
+      ]);
     } catch {
-      setResponse("Unable to fetch finance summary.")
+      setResponse("Unable to fetch finance summary.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreateSettlement(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const res = await createSettlement(settlementForm)
+      const res = await createSettlement(settlementForm);
 
-      setResponse(JSON.stringify(res, null, 2))
+      setResponse(JSON.stringify(res, null, 2));
     } catch {
-      setResponse("Create settlement failed.")
+      setResponse("Create settlement failed.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleCreateRefund(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const res = await createRefund(refundForm.bookingId)
+      const res = await createRefund(refundForm.bookingId);
 
-      setResponse(JSON.stringify(res, null, 2))
+      setResponse(JSON.stringify(res, null, 2));
     } catch {
-      setResponse("Create refund failed.")
+      setResponse("Create refund failed.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       {/* Header */}
 
       <div>
-        <h2 className="text-xl font-semibold">Finance</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl font-semibold">
           Settlement, refunds and finance summary APIs
-        </p>
+        </h2>
       </div>
 
       {/* Chart + Forms */}
@@ -192,5 +191,5 @@ export default function FinancePage() {
         <pre className="text-xs">{response}</pre>
       </div>
     </section>
-  )
+  );
 }

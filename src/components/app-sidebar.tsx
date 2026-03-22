@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NavLink } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 import { NavUser } from "@/components/nav-user";
 import {
@@ -20,7 +20,6 @@ import {
   TicketIcon,
   IndianRupeeIcon,
   UserCheckIcon,
-  CommandIcon,
 } from "lucide-react";
 
 const navItems = [
@@ -35,12 +34,14 @@ const navItems = [
 ];
 
 const user = {
-  name: "Admin",
-  email: "admin@example.com",
-  avatar: "/avatars/admin.jpg",
+  name: "Bhola Admin",
+  email: "admin@bholaadmin.com",
+  avatar: "/logo-transparent.png",
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const location = useLocation();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       {/* Header */}
@@ -48,10 +49,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/" className="flex items-center gap-2">
-                <CommandIcon className="size-5" />
+              <Link to="/" className="flex items-center h-18 gap-2">
+                <img
+                  src="/logo-transparent.png"
+                  alt="Bhola Admin"
+                  className="size-16 object-contain bg-neutral-800 rounded-lg dark:bg-white"
+                />
                 <span className="text-base font-semibold">Bhola Admin</span>
-              </NavLink>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -62,24 +67,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive =
+              item.url === "/"
+                ? location.pathname === "/"
+                : location.pathname.startsWith(item.url);
 
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <NavLink
-                    to={item.url}
-                    end={item.url === "/"}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${
-                        isActive
-                          ? "bg-muted font-semibold text-primary"
-                          : "text-muted-foreground hover:bg-muted"
-                      }`
-                    }
-                  >
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.title}
+                >
+                  <Link to={item.url} className="flex items-center gap-2">
                     <Icon className="size-4" />
                     <span>{item.title}</span>
-                  </NavLink>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );

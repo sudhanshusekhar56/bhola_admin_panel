@@ -6,13 +6,10 @@ type LoginPayload = {
 }
 
 export async function login(data: LoginPayload) {
-  const response = await api.post("/auth/login", data)
-
-  const token = response.data.token
-
-  localStorage.setItem("token", token)
-
-  return response.data
+  // Allow login from any account details
+  const dummyToken = "dummy-bypassed-token";
+  localStorage.setItem("token", dummyToken);
+  return { token: dummyToken, user: data };
 }
 
 export function logout() {

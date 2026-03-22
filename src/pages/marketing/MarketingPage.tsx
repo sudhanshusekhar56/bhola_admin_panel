@@ -1,73 +1,71 @@
-import { useState } from "react"
+import { useState } from "react";
 
-import { createNewsletter, exportAnalytics } from "@/services/admin.service"
+import { createNewsletter, exportAnalytics } from "@/services/admin.service";
 
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function MarketingPage() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const [response, setResponse] = useState(
-    "Use actions to interact with marketing APIs."
-  )
+    "Use actions to interact with marketing APIs.",
+  );
 
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState("");
 
   async function handleSendNewsletter(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!message) return
+    if (!message) return;
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const res = await createNewsletter({ message })
+      const res = await createNewsletter({ message });
 
-      setResponse(JSON.stringify(res, null, 2))
+      setResponse(JSON.stringify(res, null, 2));
     } catch {
-      setResponse("Create newsletter failed.")
+      setResponse("Create newsletter failed.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleExport(format: "csv" | "excel") {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const blob = await exportAnalytics(format)
+      const blob = await exportAnalytics(format);
 
-      const url = window.URL.createObjectURL(blob)
+      const url = window.URL.createObjectURL(blob);
 
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `analytics.${format === "csv" ? "csv" : "xlsx"}`
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `analytics.${format === "csv" ? "csv" : "xlsx"}`;
 
-      document.body.appendChild(link)
-      link.click()
+      document.body.appendChild(link);
+      link.click();
 
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      link.remove();
+      window.URL.revokeObjectURL(url);
 
-      setResponse(`Downloaded analytics ${format.toUpperCase()} file.`)
+      setResponse(`Downloaded analytics ${format.toUpperCase()} file.`);
     } catch {
-      setResponse(`Export ${format.toUpperCase()} failed.`)
+      setResponse(`Export ${format.toUpperCase()} failed.`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       {/* Header */}
 
       <div>
-        <h2 className="text-xl font-semibold">Marketing</h2>
-
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-xl font-semibold">
           Newsletter and analytics export
-        </p>
+        </h2>
       </div>
 
       {/* Newsletter */}
@@ -111,5 +109,5 @@ export default function MarketingPage() {
         <pre className="text-xs">{response}</pre>
       </div>
     </section>
-  )
+  );
 }

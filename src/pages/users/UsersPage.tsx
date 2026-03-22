@@ -24,7 +24,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(false);
 
   const [users, setUsers] = useState<any[]>(
-    dummyUsers.map((u: any) => ({ ...u, status: u.status || "ACTIVE" }))
+    dummyUsers.map((u: any) => ({ ...u, status: u.status || "ACTIVE" })),
   );
 
   const [search, setSearch] = useState("");
@@ -58,7 +58,7 @@ export default function UsersPage() {
       const updatedUsers = users.map((u) =>
         pick(u, ["userId", "id", "_id"]) === id
           ? { ...u, status: isBlocked ? "ACTIVE" : "BLOCKED" }
-          : u
+          : u,
       );
       setUsers(updatedUsers);
     } catch {
@@ -102,7 +102,7 @@ export default function UsersPage() {
         .filter(Boolean);
 
       const unique = Array.from(
-        new Set(userRows.map((u: any) => u.userId))
+        new Set(userRows.map((u: any) => u.userId)),
       ).map((userId) => ({ userId }));
 
       // setUsers(unique);
@@ -158,13 +158,13 @@ export default function UsersPage() {
     if (Array.isArray(payload)) {
       const objectRows = payload.filter((entry) => typeof entry === "object");
       const nested = payload.flatMap((entry) =>
-        findObjectArrays(entry, depth + 1)
+        findObjectArrays(entry, depth + 1),
       );
       return objectRows.length > 0 ? [objectRows, ...nested] : nested;
     }
     if (typeof payload === "object") {
       return Object.values(payload).flatMap((value) =>
-        findObjectArrays(value, depth + 1)
+        findObjectArrays(value, depth + 1),
       );
     }
     return [];
@@ -184,7 +184,7 @@ export default function UsersPage() {
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (!sortConfig) return 0;
-    
+
     let keys: string[] = [];
     if (sortConfig.key === "id") keys = ["userId", "id", "_id"];
     else if (sortConfig.key === "name") keys = ["name", "fullName"];
@@ -203,12 +203,9 @@ export default function UsersPage() {
   const pagedUsers = sortedUsers.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 px-4 lg:px-6">
       <div>
-        <h2 className="text-xl font-semibold">Users</h2>
-        <p className="text-sm text-muted-foreground">
-          Block/unblock and view users
-        </p>
+        <h2 className="text-xl font-semibold">Block/unblock and view users</h2>
       </div>
 
       <div className="rounded-lg border p-4">
@@ -285,7 +282,9 @@ export default function UsersPage() {
                   const isBlocked = item.status === "BLOCKED";
                   return (
                     <TableRow key={i}>
-                      <TableCell>{pick(item, ["userId", "id", "_id"])}</TableCell>
+                      <TableCell>
+                        {pick(item, ["userId", "id", "_id"])}
+                      </TableCell>
                       <TableCell>{pick(item, ["name", "fullName"])}</TableCell>
                       <TableCell>{pick(item, ["email"])}</TableCell>
                       <TableCell>{pick(item, ["phone", "mobile"])}</TableCell>
@@ -331,4 +330,3 @@ export default function UsersPage() {
     </section>
   );
 }
-
